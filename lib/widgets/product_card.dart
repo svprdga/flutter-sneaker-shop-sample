@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 
+import '../data/sample_products.dart';
 import '../models/product.dart';
+import '../previews/preview_helpers.dart';
 import '../theme/stride_colors.dart';
 import '../utils/formatters.dart';
 import 'circle_icon_button.dart';
@@ -323,3 +326,40 @@ class _Badge extends StatelessWidget {
     );
   }
 }
+
+@Preview(
+  group: 'ProductCard',
+  name: 'Default',
+  size: Size(187, 269),
+  theme: strideTheme,
+  brightness: Brightness.light,
+)
+Widget productCardDefaultPreview() => const ProductCard(product: aeroGlide);
+
+@Preview(
+  group: 'ProductCard',
+  name: 'Discounted',
+  size: Size(187, 269),
+  theme: strideTheme,
+  brightness: Brightness.light,
+)
+Widget productCardDiscountedPreview() =>
+    const ProductCard(product: cloudStep, isFavorite: true);
+
+@Preview(
+  group: 'ProductCard',
+  name: 'Out of stock',
+  size: Size(187, 269),
+  theme: strideTheme,
+  brightness: Brightness.light,
+)
+Widget productCardOutOfStockPreview() => const ProductCard(product: nimbusMid);
+
+@Preview(
+  group: 'ProductCard',
+  name: 'Dark mode',
+  size: Size(187, 269),
+  theme: strideTheme,
+  brightness: Brightness.dark,
+)
+Widget productCardDarkPreview() => const ProductCard(product: vantaRunner);

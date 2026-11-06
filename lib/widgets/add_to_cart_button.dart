@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 
 import '../models/add_to_cart_status.dart';
+import '../previews/preview_helpers.dart';
 import '../theme/stride_colors.dart';
 
 /// Primary "Add to Cart" action with normal, loading, disabled and
@@ -84,3 +86,33 @@ class AddToCartButton extends StatelessWidget {
     _ => Icons.shopping_bag_outlined,
   };
 }
+
+@Preview(
+  group: 'AddToCartButton',
+  name: 'Normal',
+  size: Size(320, 56),
+  theme: strideTheme,
+  brightness: Brightness.light,
+)
+Widget addToCartNormalPreview() =>
+    AddToCartButton(status: AddToCartStatus.normal, onPressed: () {});
+
+@Preview(
+  group: 'AddToCartButton',
+  name: 'Loading',
+  size: Size(320, 56),
+  theme: strideTheme,
+  brightness: Brightness.light,
+)
+Widget addToCartLoadingPreview() =>
+    const AddToCartButton(status: AddToCartStatus.loading);
+
+@Preview(
+  group: 'AddToCartButton',
+  name: 'Disabled',
+  size: Size(320, 56),
+  theme: strideTheme,
+  brightness: Brightness.light,
+)
+Widget addToCartDisabledPreview() =>
+    const AddToCartButton(status: AddToCartStatus.disabled);
