@@ -99,19 +99,19 @@ class _ProductDetailView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     spacing: 24,
                     children: [
-                      _padded(_ProductSummary(product: product)),
-                      _padded(
-                        Text(
+                      _Padded(child: _ProductSummary(product: product)),
+                      _Padded(
+                        child: Text(
                           product.description,
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(color: colors.muted, height: 1.55),
                         ),
                       ),
-                      _padded(_buildColorSection(viewModel, colors)),
-                      _padded(_buildSizeSection(viewModel, colors)),
-                      _padded(_buildQuantityRow(viewModel, colors)),
-                      _padded(
-                        ProductHighlights(
+                      _Padded(child: _ColorSection(viewModel: viewModel)),
+                      _Padded(child: _SizeSection(viewModel: viewModel)),
+                      _Padded(child: _QuantityRow(viewModel: viewModel)),
+                      _Padded(
+                        child: ProductHighlights(
                           highlights: [
                             ProductHighlight(
                               icon: Icons.air_rounded,
@@ -128,7 +128,7 @@ class _ProductDetailView extends StatelessWidget {
                           ],
                         ),
                       ),
-                      _buildRelatedProducts(context, catalog, product),
+                      _RelatedProducts(catalog: catalog, product: product),
                     ],
                   ),
                 ),
@@ -167,16 +167,29 @@ class _ProductDetailView extends StatelessWidget {
       bottomNavigationBar: _BottomActions(viewModel: viewModel),
     );
   }
+}
 
-  Widget _padded(Widget child) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: child,
-  );
+class _Padded extends StatelessWidget {
+  final Widget child;
 
-  Widget _buildColorSection(
-    ProductDetailViewModel viewModel,
-    StrideColors colors,
-  ) {
+  const _Padded({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: child,
+    );
+  }
+}
+
+class _ColorSection extends StatelessWidget {
+  final ProductDetailViewModel viewModel;
+
+  const _ColorSection({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 16,
@@ -190,11 +203,16 @@ class _ProductDetailView extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildSizeSection(
-    ProductDetailViewModel viewModel,
-    StrideColors colors,
-  ) {
+class _SizeSection extends StatelessWidget {
+  final ProductDetailViewModel viewModel;
+
+  const _SizeSection({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    final StrideColors colors = context.strideColors;
     final Product product = viewModel.product;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -231,11 +249,16 @@ class _ProductDetailView extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildQuantityRow(
-    ProductDetailViewModel viewModel,
-    StrideColors colors,
-  ) {
+class _QuantityRow extends StatelessWidget {
+  final ProductDetailViewModel viewModel;
+
+  const _QuantityRow({required this.viewModel});
+
+  @override
+  Widget build(BuildContext context) {
+    final StrideColors colors = context.strideColors;
     final Product product = viewModel.product;
     return Row(
       spacing: 16,
@@ -276,12 +299,16 @@ class _ProductDetailView extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildRelatedProducts(
-    BuildContext context,
-    CatalogViewModel catalog,
-    Product product,
-  ) {
+class _RelatedProducts extends StatelessWidget {
+  final CatalogViewModel catalog;
+  final Product product;
+
+  const _RelatedProducts({required this.catalog, required this.product});
+
+  @override
+  Widget build(BuildContext context) {
     final List<Product> related = catalog.relatedTo(product);
     if (related.isEmpty) return const SizedBox.shrink();
     final CartViewModel cart = context.read<CartViewModel>();
@@ -289,8 +316,8 @@ class _ProductDetailView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 16,
       children: [
-        _padded(
-          const SectionHeader(title: 'You may also like', trailing: 'See all'),
+        const _Padded(
+          child: SectionHeader(title: 'You may also like', trailing: 'See all'),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,

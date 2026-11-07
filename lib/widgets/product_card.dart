@@ -71,10 +71,21 @@ class _ProductCardState extends State<ProductCard> {
               mainAxisSize: MainAxisSize.min,
               spacing: 8,
               children: [
-                _buildImage(colors, product),
+                _CardImage(
+                  product: product,
+                  isFavorite: widget.isFavorite,
+                  onFavoriteToggle: widget.onFavoriteToggle,
+                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
-                  child: _buildDetails(colors, product),
+                  child: _CardDetails(
+                    product: product,
+                    showAdded: _showAdded,
+                    onAddToCart:
+                        product.isAvailable && widget.onAddToCart != null
+                        ? _handleAddToCart
+                        : null,
+                  ),
                 ),
               ],
             ),
@@ -84,7 +95,30 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 
-  Widget _buildImage(StrideColors colors, Product product) {
+  void _handleAddToCart() {
+    widget.onAddToCart?.call();
+    setState(() => _showAdded = true);
+    _addedTimer?.cancel();
+    _addedTimer = Timer(_addedFeedbackDuration, () {
+      if (mounted) setState(() => _showAdded = false);
+    });
+  }
+}
+
+class _CardImage extends StatelessWidget {
+  final Product product;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteToggle;
+
+  const _CardImage({
+    required this.product,
+    required this.isFavorite,
+    this.onFavoriteToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final StrideColors colors = context.strideColors;
     final int? discount = product.discountPercent;
     return SizedBox(
       height: 136,
@@ -120,24 +154,38 @@ class _ProductCardState extends State<ProductCard> {
             top: 8,
             right: 8,
             child: CircleIconButton(
-              icon: widget.isFavorite
+              icon: isFavorite
                   ? Icons.favorite_rounded
                   : Icons.favorite_border_rounded,
-              tooltip: widget.isFavorite
+              tooltip: isFavorite
                   ? 'Remove from favorites'
                   : 'Add to favorites',
-              onPressed: widget.onFavoriteToggle,
+              onPressed: onFavoriteToggle,
               size: 32,
               iconSize: 18,
-              foregroundColor: widget.isFavorite ? colors.sale : colors.ink,
+              foregroundColor: isFavorite ? colors.sale : colors.ink,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildDetails(StrideColors colors, Product product) {
+class _CardDetails extends StatelessWidget {
+  final Product product;
+  final bool showAdded;
+  final VoidCallback? onAddToCart;
+
+  const _CardDetails({
+    required this.product,
+    required this.showAdded,
+    this.onAddToCart,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final StrideColors colors = context.strideColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 4,
@@ -166,7 +214,7 @@ class _ProductCardState extends State<ProductCard> {
         Row(
           spacing: 8,
           children: [
-            Expanded(child: _buildRating(colors, product)),
+            Expanded(child: _CardRating(product: product)),
             StockIndicator(
               status: product.stockStatus,
               stockCount: product.stockCount,
@@ -178,16 +226,28 @@ class _ProductCardState extends State<ProductCard> {
           child: Row(
             spacing: 8,
             children: [
-              Expanded(child: _buildPrice(colors, product)),
-              _buildAddButton(colors, product),
+              Expanded(child: _CardPrice(product: product)),
+              _CardAddButton(
+                product: product,
+                showAdded: showAdded,
+                onPressed: onAddToCart,
+              ),
             ],
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildRating(StrideColors colors, Product product) {
+class _CardRating extends StatelessWidget {
+  final Product product;
+
+  const _CardRating({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final StrideColors colors = context.strideColors;
     return Row(
       spacing: 4,
       children: [
@@ -215,8 +275,16 @@ class _ProductCardState extends State<ProductCard> {
       ],
     );
   }
+}
 
-  Widget _buildPrice(StrideColors colors, Product product) {
+class _CardPrice extends StatelessWidget {
+  final Product product;
+
+  const _CardPrice({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final StrideColors colors = context.strideColors;
     final double? originalPrice = product.originalPrice;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -249,17 +317,30 @@ class _ProductCardState extends State<ProductCard> {
       ],
     );
   }
+}
 
-  Widget _buildAddButton(StrideColors colors, Product product) {
-    final bool enabled = product.isAvailable && widget.onAddToCart != null;
+class _CardAddButton extends StatelessWidget {
+  final Product product;
+  final bool showAdded;
+  final VoidCallback? onPressed;
+
+  const _CardAddButton({
+    required this.product,
+    required this.showAdded,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final StrideColors colors = context.strideColors;
     final Color background = !product.isAvailable
         ? colors.surfaceMuted
-        : _showAdded
+        : showAdded
         ? colors.success
         : colors.ink;
     final Color foreground = !product.isAvailable
         ? colors.faint
-        : _showAdded
+        : showAdded
         ? Colors.white
         : colors.surface;
 
@@ -271,11 +352,11 @@ class _ProductCardState extends State<ProductCard> {
         borderRadius: BorderRadius.circular(12),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: enabled ? _handleAddToCart : null,
+          onTap: onPressed,
           child: SizedBox.square(
             dimension: 36,
             child: Icon(
-              _showAdded ? Icons.check_rounded : Icons.add_rounded,
+              showAdded ? Icons.check_rounded : Icons.add_rounded,
               size: 20,
               color: foreground,
             ),
@@ -283,15 +364,6 @@ class _ProductCardState extends State<ProductCard> {
         ),
       ),
     );
-  }
-
-  void _handleAddToCart() {
-    widget.onAddToCart?.call();
-    setState(() => _showAdded = true);
-    _addedTimer?.cancel();
-    _addedTimer = Timer(_addedFeedbackDuration, () {
-      if (mounted) setState(() => _showAdded = false);
-    });
   }
 }
 
